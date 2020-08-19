@@ -24,6 +24,13 @@ class CredentialsForm extends Form {
     api_key: Joi.string().required().label("Client Secret"),
   };
 
+  removeCredentials = (event) => {
+    event.preventDefault();
+    localStorage.removeItem("api_id");
+    localStorage.removeItem("api_key");
+    window.location.reload();
+  };
+
   doSubmit = () => {
     localStorage.setItem("api_id", this.state.data.api_id);
     localStorage.setItem("api_key", this.state.data.api_key);
@@ -38,6 +45,13 @@ class CredentialsForm extends Form {
           {this.renderInput("api_id", "Client ID")}
           {this.renderInput("api_key", "Client Secret", "", "password")}
           {this.renderValidatedButton("Save Credentials")}
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <button
+            className="btn btn-sm btn-warning"
+            onClick={this.removeCredentials}
+          >
+            Remove Credentials
+          </button>
         </form>
       </div>
     );

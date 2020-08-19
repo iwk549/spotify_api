@@ -20,6 +20,8 @@ export async function getPlaylistRecommendations(params) {
         params.artist_id +
         "&probability=" +
         params.probability +
+        "&all_songs=" +
+        params.all_songs +
         "&api_id=" +
         params.api_id +
         "&api_key=" +
