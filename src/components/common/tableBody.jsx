@@ -3,6 +3,7 @@ import _ from "lodash";
 
 class TableBody extends Component {
   renderCell = (item, column) => {
+    console.log(item, column);
     if (column.content) return column.content(item);
     if (column.path === "date" && item.date)
       item.date = item.date.substring(0, 10);

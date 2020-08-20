@@ -1,6 +1,7 @@
 import React from "react";
 import Form from "./common/form";
 import Joi from "joi-browser";
+import { toast } from "react-toastify";
 
 class PlaylistForm extends Form {
   state = {
@@ -10,18 +11,37 @@ class PlaylistForm extends Form {
       probability: false,
       all_songs: false,
     },
+    playlistID: "",
     errors: {},
+    apiError: null,
   };
 
   schema = {
     playlistIDs: Joi.string().required().label("Playlist IDs"),
-    artistID: Joi.string().required().label("Artist ID"),
+    artistID: Joi.string().required().min(22).max(22).label("Artist ID"),
     probability: Joi.boolean().required().label("Include Probabilities"),
     all_songs: Joi.boolean().required().label("Include All Songs"),
   };
 
   doSubmit = () => {
-    this.props.callbackFunction(this.state.data);
+    let data = { ...this.state.data };
+    data.playlistIDs = this.props.selectedPlaylistIDs;
+    this.props.submitCallbackFunction(data);
+  };
+
+  getArtistCB = (id) => {
+    this.props.getArtistCB(id);
+  };
+
+  addPlaylist = async (event) => {
+    event.preventDefault();
+    let { playlistID } = this.state;
+    if (playlistID.length === 22) {
+      await this.props.getPlaylistCB(playlistID);
+      let data = { ...this.state.data };
+      data.playlistIDs = this.props.selectedPlaylistIDs;
+      this.setState({ data });
+    } else toast("Playlist ids should be 22 characters in length.");
   };
 
   handleCheck = (event) => {
@@ -34,11 +54,19 @@ class PlaylistForm extends Form {
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
-          {this.renderInput(
-            "playlistIDs",
-            "Playlist IDs (Separate each id with a comma)",
-            "autofocus"
-          )}
+          <label htmlFor="playlistID">Playlist ID</label>
+          <input
+            className="form-control"
+            id="playlistID"
+            onChange={(event) =>
+              this.setState({ playlistID: event.target.value })
+            }
+          />
+          <button className="btn btn-sm btn-dark" onClick={this.addPlaylist}>
+            Add Playlist
+          </button>
+          <br />
+          <br />
           {this.renderInput("artistID", "Artist ID")}
           <input
             type="checkbox"

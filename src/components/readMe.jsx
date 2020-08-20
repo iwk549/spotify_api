@@ -32,13 +32,13 @@ const ReadMe = ({ id, popupOpen, closeModal }) => {
             </a>
           </li>
           <li>
-            Click Save Credentials. Your credentials will be saved until you
+            Click Save Credentials. Your credentials will be stored until you
             remove them.
           </li>
           <li>
-            Enter at least two playlist ids, separated by a comma. The playlist
-            id is a 22 character string. It can be found at the end of the
-            playlist page url.
+            Enter a playlist id and click Add Playlisy. The playlist id is a 22
+            character string. It can be found at the end of the playlist page
+            url.
           </li>
           <li>
             Enter a single artist id. Again this is a 22 character string and
@@ -57,6 +57,12 @@ const ReadMe = ({ id, popupOpen, closeModal }) => {
               considerably.
             </li>
           </ul>
+          <li>
+            Double check that you have selected the correct artist and
+            playlists. You can change the artist by pasting a new artist id in
+            the form. To edit which playlists you have click the Remove Playlist
+            button below the corresponding playlist.
+          </li>
           <li>Click Get Recommendations</li>
           <li>
             The output table will appear below the form. Click Download Full

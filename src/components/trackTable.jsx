@@ -6,15 +6,16 @@ class TrackTable extends Component {
     { path: "name", label: "Track Name" },
     { path: "artists", label: "Artists" },
     { path: "album_name", label: "Album Name" },
+    { path: "spotify_link", label: "Link" },
     { path: "playlist_recommendation", label: "Playlist Recommendation" },
   ];
 
   render() {
-    const { tracks, sortColumn, onSort } = this.props;
+    const { tracks, sortColumn, onSort, columns } = this.props;
     return (
       <Table
         data={tracks}
-        columns={this.columns}
+        columns={columns}
         sortColumn={sortColumn}
         onSort={onSort}
         keyProperty={"id"}

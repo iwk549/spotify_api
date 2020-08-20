@@ -32,7 +32,7 @@ class Form extends Component {
     this.doSubmit();
   };
 
-  handleChange = ({ currentTarget: input }) => {
+  handleChange = async ({ currentTarget: input }) => {
     const errors = { ...this.state.errors };
     const errorMessage = this.validateProperty(input);
     if (errorMessage) errors[input.name] = errorMessage;
@@ -40,6 +40,10 @@ class Form extends Component {
     const data = { ...this.state.data };
     data[input.name] = input.value;
     this.setState({ data, errors, apiError: null });
+
+    if (input.name === "artistID") {
+      if (input.value.length === 22) this.getArtistCB(input.value);
+    }
   };
 
   renderValidatedButton(label) {
@@ -92,7 +96,7 @@ class Form extends Component {
       <Input
         name={name}
         type={type}
-        value={data[name]}
+        defaultValue={data[name]}
         label={label}
         onChange={this.handleChange}
         autoFocus={autofocus}

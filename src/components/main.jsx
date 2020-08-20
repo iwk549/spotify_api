@@ -10,6 +10,7 @@ import LoadingSpinner from "./common/loadingSpinner";
 import TrackTableProbs from "./trackTableWithProbs";
 import ExcelDownload from "./common/excelDownload";
 import ReadMe from "./readMe";
+import { getArtistInfo, getPlaylistInfo } from "../services/nameService";
 
 class Main extends Component {
   state = {
@@ -21,6 +22,12 @@ class Main extends Component {
     probability: false,
     all_songs: false,
     readMeOpen: false,
+    artistImageURL: "",
+    artistName: "",
+    artistGenres: "",
+    selectedArtist: "",
+    selectedPlaylists: [],
+    selectedPlaylistIDs: [],
   };
 
   handleSort = (newSortColumn) => {
@@ -31,7 +38,58 @@ class Main extends Component {
     this.setState({ searchQuery: query, selectedLeague: null, currentPage: 1 });
   };
 
-  callbackFunction = async (data) => {
+  getArtistCB = async (id) => {
+    const params = {
+      api_id: localStorage.getItem("api_id"),
+      api_key: localStorage.getItem("api_key"),
+      artistID: id,
+    };
+    const response = await getArtistInfo(params);
+    if (response.status === 200) {
+      response.data.id = id;
+      this.setState({
+        selectedArtist: response.data,
+      });
+    } else {
+      this.setState({ selectedArtist: "" });
+      toast("Artist ID is invalid");
+    }
+  };
+
+  getPlaylistCB = async (id) => {
+    const params = {
+      api_id: localStorage.getItem("api_id"),
+      api_key: localStorage.getItem("api_key"),
+      playlistID: id,
+    };
+    let selectedPlaylists = [...this.state.selectedPlaylists];
+    let selectedPlaylistIDs = [...this.state.selectedPlaylistIDs];
+    if (selectedPlaylistIDs.includes(id)) {
+      toast("You have already added this playlist.");
+      return false;
+    }
+    const response = await getPlaylistInfo(params);
+    if (response.status === 200) {
+      selectedPlaylistIDs.push(id);
+      response.data.id = id;
+      selectedPlaylists.push(response.data);
+      this.setState({ selectedPlaylists, selectedPlaylistIDs });
+      return true;
+    } else {
+      toast(response.data);
+      return false;
+    }
+  };
+
+  removePlaylist = (id) => {
+    let selectedPlaylists = [...this.state.selectedPlaylists];
+    let selectedPlaylistIDs = [...this.state.selectedPlaylistIDs];
+    selectedPlaylistIDs = selectedPlaylistIDs.filter((p) => p !== id);
+    selectedPlaylists = selectedPlaylists.filter((p) => p.id !== id);
+    this.setState({ selectedPlaylistIDs, selectedPlaylists });
+  };
+
+  submitCallbackFunction = async (data) => {
     const api_id = localStorage.getItem("api_id");
     const api_key = localStorage.getItem("api_key");
     if (!api_id || !api_key)
@@ -87,13 +145,37 @@ class Main extends Component {
       loading,
       probability,
       readMeOpen,
+      selectedArtist,
+      selectedPlaylists,
+      selectedPlaylistIDs,
     } = this.state;
     const sortedTracks = this.getPageData();
+
     let dataColumns = [];
+    let trackTableColumns = [
+      { path: "name", label: "Track Name" },
+      { path: "artists", label: "Artists" },
+      { path: "album_name", label: "Album Name" },
+    ];
+    let trackTableProbColumns = [...trackTableColumns];
     if (data)
       for (let property in data[0]) {
         dataColumns.push(property);
+        if (property.toLowerCase() !== property) {
+          data.forEach((t) => {
+            t[property] = t[property].toLocaleString("en", {
+              style: "percent",
+              minimumFractionDigits: 2,
+            });
+          });
+          trackTableProbColumns.push({ path: property, label: property });
+        }
       }
+    trackTableColumns.push({
+      path: "playlist_recommendation",
+      label: "Playlist Recommendation",
+    });
+
     return (
       <div className="container">
         <ReadMe
@@ -121,7 +203,88 @@ class Main extends Component {
         </div>
         {credentialsOpen && <CredentialsForm callback={this.openCredentials} />}
         <hr />
-        <PlaylistForm data={data} callbackFunction={this.callbackFunction} />
+
+        <PlaylistForm
+          submitCallbackFunction={this.submitCallbackFunction}
+          getArtistCB={this.getArtistCB}
+          getPlaylistCB={this.getPlaylistCB}
+          selectedPlaylistIDs={selectedPlaylistIDs.join(",")}
+        />
+        {loading && <LoadingSpinner />}
+        <hr />
+        <div className="row">
+          <div className="col" style={{ borderRight: "1px solid grey" }}>
+            <h4 className="text-left">
+              <small className="text-muted">Selected Artist: </small>
+              <a
+                href={`https://open.spotify.com/artist/${selectedArtist.id}`}
+                target="blank_"
+                rel="noopener noreferrer"
+              >
+                {selectedArtist.name}
+              </a>
+            </h4>
+            {selectedArtist && (
+              <React.Fragment>
+                <hr />
+                <div className="row">
+                  <div className="col-sm-4">
+                    <b>Followers: </b>
+                    {selectedArtist.followers.toLocaleString()}
+                    <br />
+                    <br />
+                    <img
+                      alt="artistImage"
+                      src={selectedArtist.image}
+                      style={{ maxWidth: "150px", maxHeight: "150px" }}
+                    />
+                  </div>
+                  <div className="col-sm-4">
+                    <b>Genres: </b>
+                    <ul>
+                      {selectedArtist.genres.map((g) => (
+                        <li key={g}>{g}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </React.Fragment>
+            )}
+          </div>
+          <div className="col">
+            <h4 className="text-left">
+              <small className="text-muted">Selected Playlists</small>
+            </h4>
+            {selectedPlaylists.length > 0 && (
+              <React.Fragment>
+                {selectedPlaylists.map((p) => (
+                  <ul key={p.id}>
+                    <b>
+                      <a
+                        href={`https://open.spotify.com/playlist/${p.id}`}
+                        target="blank_"
+                        rel="noopener noreferrer"
+                      >
+                        {p.name}
+                      </a>
+                    </b>
+                    <li>Tracks: {p.tracks === 100 ? "100+" : p.tracks}</li>
+                    <li>Followers: {p.followers.toLocaleString()}</li>
+                    <li>Owner: {p.owner}</li>
+                    <li>Owner userID: {p.owner_id}</li>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => this.removePlaylist(p.id)}
+                    >
+                      Remove Playlist
+                    </button>
+                  </ul>
+                ))}
+              </React.Fragment>
+            )}
+          </div>
+        </div>
+
         {loading && <LoadingSpinner />}
         <hr />
         {data.length > 0 && <ExcelDownload data={data} columns={dataColumns} />}
@@ -137,12 +300,14 @@ class Main extends Component {
                 tracks={sortedTracks}
                 sortColumn={sortColumn}
                 onSort={this.handleSort}
+                columns={trackTableProbColumns}
               />
             ) : (
               <TrackTable
                 tracks={sortedTracks}
                 sortColumn={sortColumn}
                 onSort={this.handleSort}
+                columns={trackTableColumns}
               />
             )}
           </React.Fragment>
