@@ -17,9 +17,9 @@ class ExcelDownload extends Component {
       >
         <ExcelSheet data={data} name="All Data">
           {columns.map((c) => (
-            <ExcelColumn key="id" label={c} value={c} />
+            <ExcelColumn key={c} label={c} value={c} />
           ))}
-          {/* <ExcelColumn label="Track Name" value="name" /> */}
+          {/* <ExcelColumn label="Name" value="score" /> */}
         </ExcelSheet>
       </ExcelFile>
     );

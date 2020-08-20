@@ -53,7 +53,7 @@ const ReadMe = ({ id, popupOpen, closeModal }) => {
             <li>
               Include All Songs by Artist will run the algorithm for all songs
               by the artist you entered, not just for their top ten songs. For
-              artists with very lasrge catalogs this may slow down the results
+              artists with very large catalogs this may slow down the results
               considerably.
             </li>
           </ul>
@@ -64,6 +64,13 @@ const ReadMe = ({ id, popupOpen, closeModal }) => {
             button below the corresponding playlist.
           </li>
           <li>Click Get Recommendations</li>
+          <li>
+            If you only selected a single playlist then the output will give
+            Match Distance. The lower this number the better match a song is to
+            that playlist. If two or more playlists were selected the output
+            will display the best matching playlist for each artist song. See
+            the Methodology section below for more information.
+          </li>
           <li>
             The output table will appear below the form. Click Download Full
             Data to Excel to see all available analysis columns.
@@ -103,6 +110,13 @@ const ReadMe = ({ id, popupOpen, closeModal }) => {
           fitting playlist against the estimator. Note: if{" "}
           <i>Include Match Probabilities</i> is checked then the estimator will
           alway be SVC as KNN does not provide percentages of match.
+          <br />
+          <br />
+          If only a single playlist was selected then the output is the average
+          Euclidean Distance between each song in the playlist and each song for
+          the selected artist. A lower number here means that the song matches
+          better with each of the songs in the playlist (it's values are closer
+          in distance).)
         </p>
       </div>
     </Modal>

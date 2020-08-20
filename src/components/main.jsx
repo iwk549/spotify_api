@@ -10,6 +10,7 @@ import LoadingSpinner from "./common/loadingSpinner";
 import TrackTableProbs from "./trackTableWithProbs";
 import ExcelDownload from "./common/excelDownload";
 import ReadMe from "./readMe";
+import { round } from "mathjs";
 import { getArtistInfo, getPlaylistInfo } from "../services/nameService";
 
 class Main extends Component {
@@ -104,9 +105,12 @@ class Main extends Component {
       all_songs: data.all_songs,
     };
     const response = await getPlaylistRecommendations(params);
-    if (response.status === 200)
+    if (response.status === 200) {
+      response.data.forEach((d) => {
+        d.album_id = d.album_id[0];
+      });
       this.setState({ data: response.data, probability: data.probability });
-    else toast.error(response.data);
+    } else toast.error(response.data);
     this.setState({ loading: false });
   };
 
@@ -119,6 +123,10 @@ class Main extends Component {
     const readMeOpen = this.state.readMeOpen ? false : true;
     this.setState({ readMeOpen });
   };
+
+  renderExcelDownload(data, columns) {
+    return <ExcelDownload data={data} columns={columns} />;
+  }
 
   getPageData = () => {
     const { sortColumn, data, searchQuery } = this.state;
@@ -157,24 +165,29 @@ class Main extends Component {
       { path: "artists", label: "Artists" },
       { path: "album_name", label: "Album Name" },
     ];
+
     let trackTableProbColumns = [...trackTableColumns];
-    if (data)
+    if (data) {
       for (let property in data[0]) {
         dataColumns.push(property);
         if (property.toLowerCase() !== property) {
           data.forEach((t) => {
-            t[property] = t[property].toLocaleString("en", {
-              style: "percent",
-              minimumFractionDigits: 2,
-            });
+            t[property] = round(t[property], 3);
           });
           trackTableProbColumns.push({ path: property, label: property });
         }
       }
-    trackTableColumns.push({
-      path: "playlist_recommendation",
-      label: "Playlist Recommendation",
-    });
+    }
+
+    selectedPlaylistIDs.length > 1
+      ? trackTableColumns.push({
+          path: "playlist_recommendation",
+          label: "Playlist Recommendation",
+        })
+      : trackTableColumns.push({
+          path: "euclidean_distance",
+          label: "Match Distance",
+        });
 
     return (
       <div className="container">
@@ -196,7 +209,10 @@ class Main extends Component {
             </button>
           </div>
           <div className="col-2">
-            <button className="btn btn-sm btn-info" onClick={this.modalToggle}>
+            <button
+              className="btn btn-sm btn-info sticky-top"
+              onClick={this.modalToggle}
+            >
               ReadMe
             </button>
           </div>
@@ -287,7 +303,9 @@ class Main extends Component {
 
         {loading && <LoadingSpinner />}
         <hr />
-        {data.length > 0 && <ExcelDownload data={data} columns={dataColumns} />}
+        {data.length > 0 &&
+          dataColumns.length > 0 &&
+          this.renderExcelDownload(data, dataColumns)}
         {data.length > 0 && (
           <React.Fragment>
             <SearchBox
@@ -295,7 +313,7 @@ class Main extends Component {
               onChange={this.handleSearch}
               placeholder="Search by track name..."
             />
-            {probability ? (
+            {probability && selectedPlaylistIDs.length > 1 ? (
               <TrackTableProbs
                 tracks={sortedTracks}
                 sortColumn={sortColumn}
