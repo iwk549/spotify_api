@@ -93,8 +93,8 @@ class Main extends Component {
   submitCallbackFunction = async (data) => {
     const api_id = localStorage.getItem("api_id");
     const api_key = localStorage.getItem("api_key");
-    if (!api_id || !api_key)
-      return toast.error("Please set your Spotify credentials.");
+    // if (!api_id || !api_key)
+    //   return toast.error("Please set your Spotify credentials.");
     this.setState({ loading: true });
     const params = {
       api_id: localStorage.getItem("api_id"),
