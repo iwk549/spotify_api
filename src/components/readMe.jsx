@@ -20,23 +20,8 @@ const ReadMe = ({ id, popupOpen, closeModal }) => {
         <hr />
         <h5 className="text-center">Instructions</h5>
         <ul>
-          <li>Click on Enter Spotify Credentials</li>
           <li>
-            Enter your credentials. Credentials can be obtained from the{" "}
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://developer.spotify.com/dashboard/applications"
-            >
-              Spotify for Developers Page
-            </a>
-          </li>
-          <li>
-            Click Save Credentials. Your credentials will be stored until you
-            remove them.
-          </li>
-          <li>
-            Enter a playlist id and click Add Playlisy. The playlist id is a 22
+            Enter a playlist id and click Add Playlist. The playlist id is a 22
             character string. It can be found at the end of the playlist page
             url.
           </li>

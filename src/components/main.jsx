@@ -12,6 +12,8 @@ import ExcelDownload from "./common/excelDownload";
 import ReadMe from "./readMe";
 import { round } from "mathjs";
 import { getArtistInfo, getPlaylistInfo } from "../services/nameService";
+import Chart from "./common/charts";
+import ChartSelector from "./chartSelector";
 
 class Main extends Component {
   state = {
@@ -149,7 +151,6 @@ class Main extends Component {
       data,
       sortColumn,
       searchQuery,
-      credentialsOpen,
       loading,
       probability,
       readMeOpen,
@@ -158,7 +159,7 @@ class Main extends Component {
       selectedPlaylistIDs,
     } = this.state;
     const sortedTracks = this.getPageData();
-
+    console.log(data);
     let dataColumns = [];
     let trackTableColumns = [
       { path: "name", label: "Track Name" },
@@ -196,17 +197,17 @@ class Main extends Component {
           closeModal={this.modalToggle}
           popupOpen={readMeOpen}
         />
-        <h2>Spotify Playlist Recommendations</h2>
         <div className="row">
           <div className="col">
-            <button
+            <h2>Spotify Playlist Recommendations</h2>
+            {/* <button
               className="btn btn-sm btn-secondary"
               onClick={this.openCredentials}
             >
               {credentialsOpen
                 ? "Close Credentials"
                 : "Enter Spotify Credentials"}
-            </button>
+            </button> */}
           </div>
           <div className="col-2">
             <button
@@ -217,7 +218,7 @@ class Main extends Component {
             </button>
           </div>
         </div>
-        {credentialsOpen && <CredentialsForm callback={this.openCredentials} />}
+        {/* {credentialsOpen && <CredentialsForm callback={this.openCredentials} />} */}
         <hr />
 
         <PlaylistForm
@@ -330,6 +331,7 @@ class Main extends Component {
             )}
           </React.Fragment>
         )}
+        {data.length > 0 && <ChartSelector data={this.state.data} />}
       </div>
     );
   }
